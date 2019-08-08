@@ -1,115 +1,106 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
-package threadpool;
 
+import java.util.HashSet;
 import java.util.Scanner;
-/**
- *
- * @author nithin
- */
-public class Hangman 
-{
-   
-    public String n = "" ;
-    public int len;
-    public static int state=0,hang=0,temp=0,w;
-    public int[] ca=new int[26];
-    public Hangman(String chars)
-    {
-        n=chars;
-        w=n.length();
-        len = n.length();
-        for(int i=0;i<w;i++)
-        {
-            ca[(n.charAt(i)-'a')]++; 
-        }
+import java.util.Set;
+
+public class Hangman {
+
+    Set<Character> guessedCharacter;
+    private int limit;
+    private final int maxTrails = 3;
+    private StringBuilder filledword;
+    private String word;
+    private int wordLength;
+    private int flag;
+    private int wrongEntry;
+
+    private enum hangmanState {
+        win, running, failed;};
+    hangmanState h;
+
+    public Hangman(String w) {
+
+        word = w;
+        wordLength = word.length();
     }
-    public void guess(char c)
-    {
-        
-        if(state== 0)
-        {
-            if(c >= 'a'&& c <= 'z')
-            {
-                if(ca[c-'a']!=0)
-                {
-                    ca[c-'a']--;
-                    w--;
+
+    private void guess(char p) {
+
+        if (h != hangmanState.running) {
+            throw new IllegalStateException("is not running");
+        }
+        char c = Character.toUpperCase(p);
+        if (c < 'A' || c > 'Z') {
+            throw new IllegalStateException("incorrect input");
+        } 
+
+        if (guessedCharacter.contains(c)) {
+               throw new IllegalStateException("character is allreday entered");
+            } 
+                flag = 0;
+                guessedCharacter.add(c);
+                for (int i = 0; i < wordLength; i++) {
+                    if (word.charAt(i) == c) {
+                        flag++;
+                        filledword.setCharAt(i, c);
+
+                    }
+
                 }
-                else
-                {
-                    hang++;
-                } 
+                System.out.println(filledword);
+                if (flag == 0) {
+                    wrongEntry++;
+
+                }
+            
+
+        
+        if (filledword.toString().equals(word)) {
+            h = hangmanState.win;
+
+        }
+        if (wrongEntry == 4) {
+            h = hangmanState.failed;
+            System.out.println("You have entered '"+wrongEntry+" 'worng options" );
+        }
+
+    }
+
+    public static void main(String arg[]) {
+        String word = "WELCOME";
+        //System.out.println("enter the word");
+        Scanner s = new Scanner(System.in);
+        //String word = s.nextLine().toUpperCase();
+
+        Hangman hangman = new Hangman(word);
+        hangman.h = hangmanState.running;
+        hangman.guessedCharacter = new HashSet<>();
+        hangman.filledword = new StringBuilder();
+        hangman.wordLength = word.length();
+        hangman.filledword.setLength(hangman.wordLength);
+        for (int i = 0; i < word.length(); i++) {
+            hangman.filledword.setCharAt(i, '#');
+        }
+        System.out.println(hangman.filledword);
+        hangman.limit = hangman.maxTrails + hangman.wordLength;
+
+        for (int i = 0; i < hangman.limit; i++) {
+            if (hangman.h == hangmanState.failed || hangman.h == hangmanState.win) {
+                if (hangman.h == hangmanState.win) {
+                    System.out.println("win");
+                } else {
+                    System.out.println("you have exceed maximum limit");
+                }
+                break;
+            }
+            System.out.println("enter character:");
+            char p = s.next().charAt(0);
+            try {
+                hangman.guess(p);
+            } catch (IllegalStateException e) {
+                System.out.println(e);
             }
         }
-        if(hang>2)
-        {
-            state=1;
-        }
-        if(w==0)
-        {
-            state=2;
-        }     
-    }
-   String getstatus()
-   {
-       if(state==1)
-       {
-           return("failed");
-       }
-       else
-       if(state==0)
-       {
-           return("Running");
-       }
-       else
-       {
-           return("Winn");
-       }
-   }
-            
-}
-class A extends Hangman
-{
-    
-    public A(String chars) {
-        super(chars);
-    }
- 
-    public static void main(String args[])
-    {
-     
-             
-       System.out.println("enter the string");
-       
-       Scanner s=new Scanner(System.in);
-       String p=s.nextLine();
-       
-       A a1=new A(p); 
-       
-       System.out.println("limit");
-       int g=s.nextInt();
-       
-       Scanner r=new Scanner(System.in);
-       for(int i=0;i<g;i++)
-       {
-           if(w!=0 && hang<=2)
-           {
-           String c= r.next();
-           char cc= c.charAt(0);
-           a1.guess(cc);
-           }
-           
-       }
-       
-       
-        String c =a1.getstatus();
-        System.out.println("\n\n"+c);
-    
     }
 
 }
-    
